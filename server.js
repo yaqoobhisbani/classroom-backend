@@ -22,7 +22,7 @@ app.use("/api/classrooms", require("./routes/classrooms"));
 app.use("/api/room", require("./routes/room"));
 app.use("/api/room", require("./routes/material"));
 app.use("/api/room", require("./routes/students"));
-require("./controllers/chat")(io);
+require("./chat/chat")(io);
 
 // Setting PORT & Starting Server
 const PORT = process.env.port || 5000;

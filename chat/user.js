@@ -16,8 +16,8 @@ const addUser = (room, name, dbid, sid) => {
 };
 
 // GET USER
-const getUser = dbid => {
-  return users.find(user => user.dbid === dbid);
+const getUser = sid => {
+  return users.find(user => user.sid === sid);
 };
 
 // GET USERS IN ROOM
