@@ -13,9 +13,7 @@ const messageSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
     },
-    type: {
-      Object
-    },
+    type: Object,
     required: true
   },
   classroom: {

@@ -163,7 +163,7 @@ router.delete("/:code/file/:id", auth, isAdmin, async (req, res) => {
     );
 
     // Delete File From "Data" Folder
-    await fs.unlink(file, err => {
+    fs.unlink(file, err => {
       if (err) throw err;
     });
 

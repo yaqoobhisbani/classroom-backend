@@ -98,18 +98,25 @@ router.put("/:code", auth, validateRoomCode, async (req, res) => {
     // Getting User
     const user = await User.getUser(req.user.id);
 
-    // Search Room & Add The User
-    const room = await Classroom.findOneAndUpdate(
-      { code },
-      { $push: { students: { name: user.name, id: user._id } } },
-      { new: true }
-    );
+    // Getting Classroom
+    const room = await Classroom.findOne({ code });
 
     // Send Error If Room Was Not Found
     if (!room) return res.status(404).json({ msg: "Classroom was not found!" });
 
+    // Add User in Approval List
+    const updatedRoom = await Classroom.findOneAndUpdate(
+      { code },
+      { $addToSet: { approvals: { name: user.name, id: user._id } } },
+      { new: true }
+    );
+
+    // Check If Request was Already Sent
+    if (room.approvals.length === updatedRoom.approvals.length)
+      return res.status(400).json({ msg: "Your request is already received!" });
+
     // Send The Updated Room Back To User
-    res.json(room);
+    res.json({ msg: "Your request has been sent!" });
   } catch (err) {
     // Log & Send Internal Server Error
     console.error(err.message);

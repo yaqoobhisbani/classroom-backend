@@ -39,9 +39,13 @@ router.post(
       // Add New User in The Classroom
       const room = await Classroom.findOneAndUpdate(
         { code },
-        { $push: { students: { name: user.name, id: user._id } } },
+        { $addToSet: { students: { name: user.name, id: user._id } } },
         { new: true }
       );
+
+      // Send Response If User Was Already Member
+      if (req.room.students.length === room.students.length)
+        return res.status(400).json({ msg: "The student is already member!" });
 
       // Sending Updated Room Back To User
       res.json(room);
@@ -77,6 +81,75 @@ router.delete("/:code/student/:id", auth, isAdmin, async (req, res) => {
     );
 
     // Sending Updated Room Back To User
+    res.json(room);
+  } catch (err) {
+    // Log & Send Internal Server Error
+    console.error(err.message);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
+
+// @route   POST api/room/:code/approve
+// @desc    Approve Join Room Request
+// @access  PRIVATE / ROOM ADMIN
+router.post("/:code/approve", auth, isAdmin, async (req, res) => {
+  // Extracting Values From The Request
+  const code = req.params.code;
+  const id = req.body.id;
+
+  try {
+    // Get User
+    const user = await User.findById(id);
+
+    // Send Response If User Doesn't Exist
+    if (!user) return res.status(400).json({ msg: "The user doesn't exist!" });
+
+    // Remove User From The Approval List
+    const room = await Classroom.findOneAndUpdate(
+      { code },
+      { $pull: { approvals: { name: user.name, id: user._id } } },
+      { new: true }
+    );
+
+    // Add User To The Students List
+    const updatedRoom = await Classroom.findOneAndUpdate(
+      { code },
+      { $addToSet: { students: { name: user.name, id: user._id } } },
+      { new: true }
+    );
+
+    // Send Updated Room Back
+    res.json(updatedRoom);
+  } catch (err) {
+    // Log & Send Internal Server Error
+    console.error(err.message);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
+
+// @route   DELETE api/room/:code/deny
+// @desc    Deny Join Room Request
+// @access  PRIVATE / ROOM ADMIN
+router.delete("/:code/deny", auth, isAdmin, async (req, res) => {
+  // Extracting Values From The Request
+  const code = req.params.code;
+  const id = req.body.id;
+
+  try {
+    // Get User
+    const user = await User.findById(id);
+
+    // Send Response If User Doesn't Exist
+    if (!user) return res.status(400).json({ msg: "The user doesn't exist!" });
+
+    // Remove User From The Approval List
+    const room = await Classroom.findOneAndUpdate(
+      { code },
+      { $pull: { approvals: { name: user.name, id: user._id } } },
+      { new: true }
+    );
+
+    // Send Updated Room Back
     res.json(room);
   } catch (err) {
     // Log & Send Internal Server Error

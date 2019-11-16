@@ -21,6 +21,18 @@ const classroomSchema = mongoose.Schema({
     required: true,
     unique: true
   },
+  approvals: [
+    {
+      name: {
+        type: String
+      },
+      id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      },
+      type: Object
+    }
+  ],
   students: [
     {
       name: {
