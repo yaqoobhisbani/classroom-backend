@@ -130,10 +130,10 @@ router.post("/:code/approve", auth, isAdmin, async (req, res) => {
 // @route   DELETE api/room/:code/deny
 // @desc    Deny Join Room Request
 // @access  PRIVATE / ROOM ADMIN
-router.delete("/:code/deny", auth, isAdmin, async (req, res) => {
+router.delete("/:code/deny/:id", auth, isAdmin, async (req, res) => {
   // Extracting Values From The Request
   const code = req.params.code;
-  const id = req.body.id;
+  const id = req.params.id;
 
   try {
     // Get User
