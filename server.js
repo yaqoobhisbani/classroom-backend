@@ -21,6 +21,7 @@ app.use("/api/users", require("./routes/users"));
 app.use("/api/classrooms", require("./routes/classrooms"));
 app.use("/api/room", require("./routes/room"));
 app.use("/api/room", require("./routes/material"));
+app.use("/api/room", require("./routes/tasks"));
 app.use("/api/room", require("./routes/students"));
 require("./chat/chat")(io);
 
