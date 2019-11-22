@@ -8,7 +8,7 @@ const Task = require("../models/Task");
 const router = express.Router();
 
 // @route   POST api/room/:code/tasks
-// @desc    Assign Tasks To Students in a Room
+// @desc    Create Task in A Room
 // @access  PRIVATE / ROOM ADMIN
 router.post(
   "/:code/tasks",
@@ -51,8 +51,25 @@ router.post(
 );
 
 // @route   GET api/room/:code/tasks
-// @desc    Get All Tasks of a User
+// @desc    Get All Tasks of A Room
 // @access  PRIVATE / MEMBER
-router.get("/:code/tasks", auth, isMember, (req, res) => {});
+router.get("/:code/tasks", auth, isMember, async (req, res) => {
+  try {
+    // Get Tasks of Room
+    const tasks = await Task.find({ classroom: req.roomId }).sort({
+      _id: -1
+    });
+
+    // Send Reponse If There are No Tasks
+    if (!tasks) return res.json({ msg: "No Tasks Available!" });
+
+    // Send Tasks
+    res.json(tasks);
+  } catch (err) {
+    // Log & Send Internal Server Error
+    console.error(err.message);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
 
 module.exports = router;
