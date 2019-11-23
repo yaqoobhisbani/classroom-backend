@@ -16,7 +16,6 @@ router.post(
   isAdmin,
   validateCreateTask,
   async (req, res) => {
-    console.log("INside ROUTE");
     // Get Errors & Send Them If Any
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -71,6 +70,51 @@ router.get("/:code/tasks", auth, isMember, async (req, res) => {
     res.status(500).json({ msg: "Server Error" });
   }
 });
+
+// @route   DELETE api/room/:code/task/:id
+// @desc    Delete a Task From Room
+// @access  PRIVATE / ADMIN
+router.put(
+  "/:code/task/:id",
+  auth,
+  isAdmin,
+  validateCreateTask,
+  async (req, res) => {
+    // Get Errors & Send Them If Any
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.mapped() });
+    }
+
+    // Extract Data From The Request
+    const { title, description, taskType, dueDate } = req.body;
+    const id = req.params.id;
+    try {
+      // Find Task & Update It
+      const task = await Task.findByIdAndUpdate(
+        id,
+        {
+          title,
+          description,
+          taskType,
+          dueDate
+        },
+        { new: true }
+      );
+
+      // Send Response If Task is Not Found
+      if (!task)
+        return res.status(401).json({ msg: "The task was not found!" });
+
+      // Send Task Back
+      res.json(task);
+    } catch (err) {
+      // Log & Send Internal Server Error
+      console.error(err.message);
+      res.status(500).json({ msg: "Server Error" });
+    }
+  }
+);
 
 // @route   DELETE api/room/:code/task/:id
 // @desc    Delete a Task From Room
