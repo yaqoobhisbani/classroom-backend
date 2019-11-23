@@ -72,4 +72,23 @@ router.get("/:code/tasks", auth, isMember, async (req, res) => {
   }
 });
 
+// @route   DELETE api/room/:code/task/:id
+// @desc    Delete a Task From Room
+// @access  PRIVATE / ADMIN
+router.delete("/:code/task/:id", auth, isAdmin, async (req, res) => {
+  try {
+    // Extract Data
+    const id = req.params.id;
+
+    // Find Task & Delete it in Database
+    await Task.findByIdAndDelete(id);
+
+    res.json();
+  } catch (err) {
+    // Log & Send Internal Server Error
+    console.error(err.message);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
+
 module.exports = router;
