@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const auth = require("../middlewares/auth");
 const isAdmin = require("../middlewares/isAdmin");
 const {
@@ -8,6 +10,9 @@ const {
 } = require("../validators/classrooms");
 const { validationResult } = require("express-validator");
 const Classroom = require("../models/Classroom");
+const Material = require("../models/Material");
+const Task = require("../models/Task");
+const Message = require("../models/Message");
 const router = express.Router();
 
 // @route   PUT api/room/:code/classname
@@ -120,5 +125,48 @@ router.put(
     }
   }
 );
+
+// @route   DELETE api/room/:code
+// @desc    Delete a Classroom
+// @access  PRIVATE / ROOM ADMIN
+router.delete("/:code", auth, isAdmin, async (req, res) => {
+  // Extracting Data From Request
+  const code = req.params.code;
+  const roomID = req.room._id;
+
+  try {
+    // Delete All Material From Database
+    await Material.deleteMany({ classroom: roomID }, err => {
+      if (err) throw err;
+    });
+
+    // Delete Room Folder in Data
+    const roomFolderPath = path.join(__dirname, "..", "/data/", `${code}`);
+    fs.rmdir(roomFolderPath, { recursive: true }, err => {
+      if (err) throw err;
+    });
+
+    // Delete All Tasks
+    await Task.deleteMany({ classroom: roomID }, err => {
+      if (err) throw err;
+    });
+
+    // Delete All Messages
+    await Message.deleteMany({ classroom: roomID }, err => {
+      if (err) throw err;
+    });
+
+    // Delete Room
+    await Classroom.findOneAndRemove({ _id: roomID }, (err, res) => {
+      if (err) throw err;
+    });
+
+    res.json({ msg: "The classroom has been deleted!" });
+  } catch (err) {
+    // Log & Send Internal Server Error
+    console.error(err.message);
+    res.status(500).json({ msg: "Server Error" });
+  }
+});
 
 module.exports = router;
